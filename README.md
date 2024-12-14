@@ -37,8 +37,8 @@ La **Plataforma de Predicción de Desastres Naturales** es un sistema desarrolla
 
 1. **Clona el repositorio**:
    ```bash
-   git clone https://github.com/usuario/proyecto-prediccion-desastres
-   cd proyecto-prediccion-desastres
+   git clone https://github.com/D4rk-h/DisAIster.git
+   cd DisAIster
    ```
 2. **Configura la base de datos**:
    - Importa el archivo `schema.sql` en tu servidor MySQL.
