@@ -1,95 +1,68 @@
 package main.ui;
 
-import main.model.*;
-import java.util.Scanner;
-import java.util.List;
+import main.model.DisasterEvent;
+import main.model.PredictionModel;
+import main.model.Simulation;
+import main.model.DisasterAnalyzer;
 
+import java.util.List;
+import java.util.Scanner;
 
 public class ConsoleAppUI {
-    public static void main(String[] args) {
+    public void start() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Welcome to the Natural Disaster Forecast System!");
-
         List<DisasterEvent> events = Simulation.generateSampleData();
+        PredictionModel model = new PredictionModel();
+        DisasterAnalyzer analyzer = new DisasterAnalyzer(model);
 
+        System.out.println("Welcome to the Natural Disaster Prediction System!");
         while (true) {
             System.out.println("\nChoose an option:");
-            System.out.println("1. Analyze Sample Data");
-            System.out.println("2. Add a New Disaster Event");
-            System.out.println("3. Exit");
+            System.out.println("1. Analyze current disasters");
+            System.out.println("2. Predict future risks");
+            System.out.println("3. Add a new disaster event");
+            System.out.println("4. Exit");
+            System.out.print("Your choice: ");
 
-            int choice;
-            while (true) {
-                System.out.print("Your choice: ");
-                if (scanner.hasNextInt()) {
-                    choice = scanner.nextInt();
-                    break;
-                } else {
-                    System.out.println("Invalid input. Please enter a number.");
-                    scanner.next();
-                }
-            }
+            int choice = scanner.nextInt();
+            scanner.nextLine();
 
             if (choice == 1) {
-                PredictionModel model = new PredictionModel();
-                DisasterAnalyzer analyzer = new DisasterAnalyzer(model);
-
-                System.out.println("\n===== Disaster Analysis Results =====");
-                System.out.println(String.format("%-15s %-15s %-10s %-15s %-10s",
-                        "TYPE", "LOCATION", "MAGNITUDE", "DATE", "IMPACT"));
-                for (DisasterEvent event : events) {
-                    System.out.println(String.format("%-15s %-15s %-10.2f %-15s %-10.2f",
-                            event.getEventType(), event.getLocation(), event.getMagnitude(), event.getDate(), event.getImpactScore()));
-                }
-                double avgRisk = analyzer.calculateAverageRisk(events);
-                System.out.println("\nAverage Risk Score: " + avgRisk);
-                System.out.println("=====================================");
+                analyzer.analyze(events);
+                System.out.printf("Average Risk Score: %.2f\n", analyzer.calculateAverageRisk(events));
             } else if (choice == 2) {
-                System.out.println("Enter the disaster details:");
-                System.out.println("Enter the disaster details:");
-                System.out.print("Type: ");
-                String type = scanner.next();
-                System.out.print("Location: ");
-                String location = scanner.next();
+                System.out.print("Enter location: ");
+                String location = scanner.nextLine();
+                System.out.print("Enter disaster type (e.g., Earthquake, Flood, Storm): ");
+                String type = scanner.nextLine();
+                System.out.print("Enter months ahead for prediction: ");
+                int months = scanner.nextInt();
 
-                double magnitude;
-                do {
-                    System.out.print("Magnitude: ");
-                    magnitude = scanner.nextDouble();
-                    if (magnitude <= 0) {
-                        System.out.println("Magnitude must be a positive number. Please try again.");
-                    }
-                } while (magnitude <= 0);
-
-                System.out.print("Date (YYYY-MM-DD): ");
-                String date = scanner.next();
-
-                double impact;
-                do {
-                    System.out.print("Impact: ");
-                    impact = scanner.nextDouble();
-                    if (impact < 0 || impact > 100) {
-                        System.out.println("Impact must be between 0 and 100. Please try again.");
-                    }
-                } while (impact < 0 || impact > 100);
-
-                boolean exists = events.stream().anyMatch(e ->
-                        e.getEventType().equalsIgnoreCase(type) &&
-                                e.getLocation().equalsIgnoreCase(location) &&
-                                e.getDate().equals(date));
-                if (exists) {
-                    System.out.println("This event already exists. Please try again.");
-                } else {
-                    DisasterEvent newEvent = new DisasterEvent(type, location, magnitude, date, impact);
-                    events.add(newEvent);
-                    System.out.println("New disaster event added successfully.");
-                }
+                double futureRisk = model.predictFutureRisk(location, type, months);
+                System.out.printf("Predicted Risk in %s for %s in %d months: %.2f\n",
+                        location, type, months, futureRisk);
             } else if (choice == 3) {
+                System.out.print("Enter disaster type: ");
+                String type = scanner.nextLine();
+                System.out.print("Enter location: ");
+                String location = scanner.nextLine();
+                System.out.print("Enter magnitude: ");
+                double magnitude = scanner.nextDouble();
+                scanner.nextLine();
+                System.out.print("Enter date (YYYY-MM-DD): ");
+                String date = scanner.nextLine();
+
+                DisasterEvent newEvent = new DisasterEvent(type, location, magnitude, date, 0);
+                double risk = model.predictRisk(newEvent);
+                newEvent.setImpactScore(risk);
+                events.add(newEvent);
+                System.out.println("New disaster event added successfully!");
+            } else if (choice == 4) {
                 System.out.println("Goodbye!");
                 break;
             } else {
-                System.out.println("Invalid choice. Please try again.");
+                System.out.println("Invalid option. Please try again.");
             }
         }
 
