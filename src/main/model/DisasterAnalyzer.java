@@ -1,4 +1,7 @@
-package main.model;
+package main.analyzer;
+
+import main.model.DisasterEvent;
+import main.model.PredictionModel;
 
 import java.util.List;
 
@@ -10,6 +13,10 @@ public class DisasterAnalyzer {
     }
 
     public void analyze(List<DisasterEvent> events) {
+        System.out.println("\n===== Disaster Data Analysis =====");
+        System.out.println(String.format("%-12s %-15s %-10s %-12s %-10s",
+                "Type", "Location", "Magnitude", "Date", "Impact"));
+        System.out.println("-----------------------------------------------------------");
         for (DisasterEvent event : events) {
             double risk = model.predictRisk(event);
             event.setImpactScore(risk);
